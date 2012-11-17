@@ -103,11 +103,11 @@ task main()
   if(up)
   	{
   		servo[servo1]=0;
-  		servo[servo2]=255;
+  		servo[servo2]=250;
   	}
   	else
   		{
-  			servo[servo1]=255;
+  			servo[servo1]=250;
   			servo[servo2]=0;
   		}
 
