@@ -113,12 +113,18 @@ task main()
 
   		if(joy1Btn(6) == 1 || joy1Btn(8) == 1)                      //if button 6 is pressed
   		{
-  		    if (joy1Btn(6) == 1)
+  		    if (joy1Btn(6) == 1) {
   					motor[motorF]= 100;
-  			  else
+  					motor[motorE] = -100;
+  				}
+  			  else {
   			  	motor[motorF] = -100;
+  			  	motor[motorE] = 100;
+  			  }
   		}
-  		else
+  		else {
   			motor[motorF] = 0;
+  			motor[motorE] = 0;
+  		}
   }
 }
