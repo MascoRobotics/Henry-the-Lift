@@ -30,6 +30,10 @@
 |*    Port D                  motorD              12V                  Right motor                         *|
 |*    Port E                  motorE              12V                 Left motor                          *|
 \*---------------------------------------------------------------------------------------------------4246-*/
+void initializeRobot()
+{
+  return;
+}
 
 #include "JoystickDriver.c"
 float angle, magnitude, x, y;
@@ -38,7 +42,8 @@ int threshold = 40;
 bool pressed;
 task main()
 {
-	waitForStart();
+  initializeRobot();
+  waitForStart();
 	
   while(true)
   {
