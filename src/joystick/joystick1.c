@@ -44,12 +44,11 @@ task main()
 {
   initializeRobot();
   waitForStart();
-	
+
   while(true)
   {
-  	servoChangeRate[servo2] = 0;
-  	magnitude = sqrt((joystick.joy1_x2)*(joystick.joy1_x2)+(joystick.joy1_y1)*(joystick.joy1_y1));
-  	if(joystick.joy1_x2 > 0){
+  	magnitude = sqrt((joystick.joy1_x1)*(joystick.joy1_x1)+(joystick.joy1_y1)*(joystick.joy1_y1));
+  	if(joystick.joy1_x1 > 0){
   		angle = asin((joystick.joy1_y1)/magnitude)+(3.1415292/4);
   	}else{
   		angle = ((3.1415292/2)-asin((joystick.joy1_y1)/magnitude))+(3.1415292/2)+(3.1415292/4);
@@ -59,13 +58,13 @@ task main()
   	writeDebugStream("int x is: %d", magnitude);
   	writeDebugStream("int angle is: %d", angle);
     getJoystickSettings(joystick);
-    if(abs(joystick.joy1_x1) > threshold){
-    	motor[motorA] = -joystick.joy1_x1;
-    	motor[motorB] = -joystick.joy1_x1;
-    	motor[motorD] = joystick.joy1_x1;
-    	motor[motorC] = -joystick.joy1_x1;
+    if(abs(joystick.joy1_x2) > threshold){
+    	motor[motorA] = -joystick.joy1_x2;
+    	motor[motorB] = -joystick.joy1_x2;
+    	motor[motorD] = joystick.joy1_x2;
+    	motor[motorC] = -joystick.joy1_x2;
   	}
-  	else if(abs(joystick.joy1_x2) > threshold || abs(joystick.joy1_y1) > threshold){
+  	else if(abs(joystick.joy1_x1) > threshold || abs(joystick.joy1_y1) > threshold){
   		motor[motorA] = -x;
     	motor[motorD] = -x;
     	motor[motorB] = -y;
