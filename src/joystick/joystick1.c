@@ -47,7 +47,7 @@ task main()
 
   while(true)
   {
-  	magnitude = sqrt((joystick.joy1_x1)*(joystick.joy1_x1)+(joystick.joy1_y1)*(joystick.joy1_y1));
+  	  	magnitude = sqrt((joystick.joy1_x1)*(joystick.joy1_x1)+(joystick.joy1_y1)*(joystick.joy1_y1));
   	if(joystick.joy1_x1 > 0){
   		angle = asin((joystick.joy1_y1)/magnitude)+(3.1415292/4);
   	}else{
