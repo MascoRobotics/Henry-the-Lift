@@ -1,12 +1,13 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
 #pragma config(Sensor, S1,     ,               sensorI2CMuxController)
-#pragma config(Motor,  mtr_S1_C1_1,     motorA,             tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C1_2,     motorE,             tmotorTetrix, openLoop, reversed)
-#pragma config(Motor,  mtr_S1_C2_1,     motorB,             tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C2_2,     motorC,             tmotorTetrix, openLoop, reversed)
-#pragma config(Motor,  mtr_S1_C3_1,     motorD,             tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C3_2,     motorF,             tmotorTetrix, openLoop)
-#pragma config(Servo,  srvo_S1_C4_1,    servo1,               tServoNone)
+#pragma config(Sensor, S2,     SPEAK,          sensorSoundDB)
+#pragma config(Motor,  mtr_S1_C1_1,     motorA,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C1_2,     motorE,        tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C2_1,     motorB,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_2,     motorC,        tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C3_1,     motorD,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C3_2,     motorF,        tmotorTetrix, openLoop)
+#pragma config(Servo,  srvo_S1_C4_1,    servo1,               tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_2,    servo2,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_3,    servo3,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_4,    servo4,               tServoNone)
@@ -30,107 +31,90 @@
 |*    Port D                  motorD              12V                  Right motor                         *|
 |*    Port E                  motorE              12V                 Left motor                          *|
 \*---------------------------------------------------------------------------------------------------4246-*/
+#include "JoystickDriver.c"
 void initializeRobot()
 {
-  return;
+	//waitForStart();
+	return;
 }
-
-#include "JoystickDriver.c"
 float angle, magnitude, x, y;
 bool up = false;
 int threshold = 40;
 bool pressed;
 task main()
 {
-  initializeRobot();
-  waitForStart();
-
-  while(true)
-  {
-  	  	magnitude = sqrt((joystick.joy1_x1)*(joystick.joy1_x1)+(joystick.joy1_y1)*(joystick.joy1_y1));
-  	if(joystick.joy1_x1 > 0){
-  		angle = asin((joystick.joy1_y1)/magnitude)+(3.1415292/4);
-  	}else{
-  		angle = ((3.1415292/2)-asin((joystick.joy1_y1)/magnitude))+(3.1415292/2)+(3.1415292/4);
-		}
+	//initializeRobot();
+  servoChangeRate[servo1] = 10000;
+	nMotorEncoder[motorF] = 0;
+	PlaySoundFile("cmc.rso");
+	while(true) {
+		magnitude = sqrt((joystick.joy1_x1)*(joystick.joy1_x1)+(joystick.joy1_y1)*(joystick.joy1_y1));
+		if(joystick.joy1_x1 > 0)
+			angle = asin((joystick.joy1_y1)/magnitude)+(3.1415292/4);
+		else
+			angle = ((3.1415292/2)-asin((joystick.joy1_y1)/magnitude))+(3.1415292/2)+(3.1415292/4);
 		x = cos(angle)*magnitude;
 		y = sin(angle)*magnitude;
-  	writeDebugStream("int x is: %d", magnitude);
-  	writeDebugStream("int angle is: %d", angle);
-    getJoystickSettings(joystick);
-    if(abs(joystick.joy1_x2) > threshold){
-    	motor[motorA] = -joystick.joy1_x2;
-    	motor[motorB] = -joystick.joy1_x2;
-    	motor[motorD] = joystick.joy1_x2;
-    	motor[motorC] = -joystick.joy1_x2;
-  	}
-  	else if(abs(joystick.joy1_x1) > threshold || abs(joystick.joy1_y1) > threshold){
-  		motor[motorA] = -x;
-    	motor[motorD] = -x;
-    	motor[motorB] = -y;
-    	motor[motorC] = y;
-  		/*if(abs(joystick.joy1_x1) > threshold && abs(joystick.joy1_y1) > threshold){
-				motor[motorA] = joystick.joy1_x1;
-    		motor[motorD] = joystick.joy1_x1;
-    		motor[motorB] = joystick.joy1_y1;
-    		motor[motorC] = -joystick.joy1_y1;
-  		}
-  		else{
-  			if(abs(joystick.joy1_x1) > threshold){
-					motor[motorA] = joystick.joy1_x1;
-    			motor[motorD] = joystick.joy1_x1;
-    			motor[motorB] = 0;
-    			motor[motorC] = 0;
-    		}
-    		if(abs(joystick.joy1_y1) > threshold){
-					motor[motorA] = 0;
-    			motor[motorD] = 0;
-    			motor[motorB] = joystick.joy1_y1;
-    			motor[motorC] = -joystick.joy1_y1;
-    		}
-    	}*/
-    }
-    else{
-    	motor[motorA] = 0;
-    	motor[motorD] = 0;
-    	motor[motorB] = 0;
-    	motor[motorC] = 0;
-  }
-  if (joy2Btn(1) == 1)
-  	{
-  	pressed = true;
-  }
-  else {
-  	if (pressed) {
-  		up = !up;
-  	}
-  	pressed = false;
-  }
-  if(up)
-  	{
-  		servo[servo1]=100;
-  		servo[servo2]=255;
-  	}
-  	else
-  		{
-  			servo[servo1]=255;
-  			servo[servo2]=100;
-  		}
+		writeDebugStream("int x is: %d", magnitude);
+		writeDebugStream("int angle is: %d", angle);
+		getJoystickSettings(joystick);
+		if(abs(joystick.joy1_x2) > threshold){
+			motor[motorA] = -joystick.joy1_x2;
+			motor[motorB] = -joystick.joy1_x2;
+			motor[motorD] = joystick.joy1_x2;
+			motor[motorC] = -joystick.joy1_x2;
+		}
+		else if(abs(joystick.joy1_x1) > threshold || abs(joystick.joy1_y1) > threshold){
+			motor[motorA] = -x;
+			motor[motorD] = -x;
+			motor[motorB] = -y;
+			motor[motorC] = y;
+		}
+		else{
+			motor[motorA] = 0;
+			motor[motorD] = 0;
+			motor[motorB] = 0;
+			motor[motorC] = 0;
+		}
+		if (joy1Btn(4) == 1 || joy1Btn(3) == 1) {
+			if (joy1Btn(4) == 1)
+				PlaySound(soundFastUpwardTones);
+			else
+				PlaySound(soundBeepBeep);
+		}
+		else {
+			ClearSounds();
+		}
+		if (joy2Btn(1) == 1) {
+			pressed = true;
+		}
+		else {
+			if (pressed) {
+				up = !up;
+			}
+			pressed = false;
+		}
 
-  		if(joy2Btn(6) == 1 || joy2Btn(8) == 1)                      //if button 6 is pressed
-  		{
-  		    if (joy2Btn(6) == 1) {
-  					motor[motorF]= 100;
-  					motor[motorE] = -100;
-  				}
-  			  else {
-  			  	motor[motorF] = -100;
-  			  	motor[motorE] = 100;
-  			  }
-  		}
-  		else {
-  			motor[motorF] = 0;
-  			motor[motorE] = 0;
-  		}
-  }
+		if (up)
+			servo[servo1] = 0;
+		else
+			servo[servo1] = 255;
+
+
+		if(joy2Btn(6) == 1 || joy2Btn(8) == 1) {
+			nxtDisplayString(0, "%d", nMotorEncoder[motorF]);
+			if (joy2Btn(6) == 1) {
+				motor[motorF]= 100;
+				motor[motorE] = -100;
+			}
+			else {
+				motor[motorF] = -100;
+				motor[motorE] = 100;
+			}
+		}
+		else {
+			motor[motorF] = 0;
+			motor[motorE] = 0;
+		}
+	}
 }
