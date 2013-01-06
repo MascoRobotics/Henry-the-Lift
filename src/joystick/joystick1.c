@@ -37,6 +37,17 @@ void initializeRobot()
 	//waitForStart();
 	return;
 }
+
+void setLevel(int height)
+{
+	while (abs(nMotorEncoder[motorF] - height) > 30) {
+		if (nMotorEncoder[motorF] > height)
+			motor[motorF] = -50;
+		else
+			motor[motorF] = 50;
+	}
+	motor[motorF] = 0;
+}
 float angle, magnitude, x, y;
 bool up = false;
 int threshold = 40;
@@ -44,7 +55,7 @@ bool pressed;
 task main()
 {
 	//initializeRobot();
-  servoChangeRate[servo1] = 10000;
+	servoChangeRate[servo1] = 10000;
 	nMotorEncoder[motorF] = 0;
 	PlaySoundFile("cmc.rso");
 	while(true) {
@@ -96,12 +107,19 @@ task main()
 		}
 
 		if (up)
-			servo[servo1] = 0;
+			servo[servo1] = 145;
 		else
 			servo[servo1] = 255;
 
+		if (joy2Btn(2) || joy2Btn(1) || joy2Btn(4)) {
+			if (joy2Btn(2)) {
+				setLevel(2750);
+			}
+		}
+
 
 		if(joy2Btn(6) == 1 || joy2Btn(8) == 1) {
+			nxtDisplayString(0, "       ");
 			nxtDisplayString(0, "%d", nMotorEncoder[motorF]);
 			if (joy2Btn(6) == 1) {
 				motor[motorF]= 100;
@@ -112,6 +130,7 @@ task main()
 				motor[motorE] = 100;
 			}
 		}
+
 		else {
 			motor[motorF] = 0;
 			motor[motorE] = 0;
