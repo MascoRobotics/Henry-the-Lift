@@ -1,6 +1,3 @@
-/*
-=== MOTOR CONFIG ===
-*/
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
 #pragma config(Hubs,  S4, HTMotor,  none,     none,     none)
 #pragma config(Sensor, S1,     ,               sensorI2CMuxController)
@@ -188,7 +185,7 @@ task main()
 
 
 		/*
-		=== LIFT MOVEMENT ===
+		=== RAMP MOVEMENT ===
 		*/
 		if (joy1Btn(5) || joy1Btn(7)) {
 			if (joy1Btn(5)) {
@@ -200,6 +197,16 @@ task main()
 		}
 		else
 			motor[motorK] = 0;
+	  if (joy1Btn(6) || joy1Btn(8)) {
+	  	if (joy1Btn(6)) {
+	  		motor[motorJ] = 100;
+	  	}
+	  	else {
+	  		motor[motorJ] = -100;
+	  	}
+	  }
+	  else
+	  	motor[motorJ] = 0;
 		/*
 		=========
 		*/
@@ -229,7 +236,7 @@ task main()
 		/*
 		=== SPEED ADJUSTER ===
 		*/
-		if (joy1Btn(6)) {
+		if (joystick.joy1_TopHat == 0) {
 			pressed2 = true;
 		}
 		else {
@@ -237,7 +244,7 @@ task main()
 				speed = speed / 2;
 			pressed2 = false;
 		}
-		if (joy1Btn(8)) {
+		if (joystick.joy1_TopHat == 4) {
 			pressed3 = true;
 		}
 		else {
