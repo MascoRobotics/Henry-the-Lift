@@ -32,25 +32,34 @@
 |*    Port E                  motorE              12V                 Left motor                          *|
 \*---------------------------------------------------------------------------------------------------4246-*/
 #include "JoystickDriver.c"
-int stage1 = 850;
-int stage2 = 0;
-int stage3 = 0;
+int stage1F = 2473;
+int stage2F = 12720;
+int stage2E = -3303;
 int limit1 = 12689;
-int limit2 = 0;
+int limit2 = -6475;
 bool ignorelimit;
 void initializeRobot()
 {
 	//waitForStart();
 	return;
 }
-
-void setLevel(int height)
+void setLevelE(int height)
 {
-	while (abs(nMotorEncoder[motorF] - height) > 30) {
+	while (abs(nMotorEncoder[motorE] - height) > 10) {
+		if (nMotorEncoder[motorE] > height)
+			motor[motorE] = -40;
+	  else
+	  	motor[motorE] = 40;
+  }
+  motor[motorE] = 0;
+}
+void setLevelF(int height)
+{
+	while (abs(nMotorEncoder[motorF] - height) > 10) {
 		if (nMotorEncoder[motorF] > height)
-			motor[motorF] = -50;
+			motor[motorF] = -40;
 		else
-			motor[motorF] = 50;
+			motor[motorF] = 40;
 	}
 	motor[motorF] = 0;
 }
@@ -77,16 +86,16 @@ task main()
 		writeDebugStream("int angle is: %d", angle);
 		getJoystickSettings(joystick);
 		if(abs(joystick.joy1_x2) > threshold){
-			motor[motorA] = -joystick.joy1_x2;
-			motor[motorB] = -joystick.joy1_x2;
-			motor[motorD] = -joystick.joy1_x2;
-			motor[motorC] = -joystick.joy1_x2;
+			motor[motorA] = joystick.joy1_x2;
+			motor[motorB] = joystick.joy1_x2;
+			motor[motorD] = joystick.joy1_x2;
+			motor[motorC] = joystick.joy1_x2;
 		}
 		else if(abs(joystick.joy1_x1) > threshold || abs(joystick.joy1_y1) > threshold){
-			motor[motorA] = x;
+			motor[motorA] = y;
 			motor[motorD] = x;
 			motor[motorB] = -y;
-			motor[motorC] = -y;
+			motor[motorC] = -x;
 		}
 		else{
 			motor[motorA] = 0;
@@ -103,7 +112,7 @@ task main()
 		else {
 			ClearSounds();
 		}
-		if (joy2Btn(1) == 1) {
+		if (joy2Btn(2) == 1) {
 			pressed = true;
 		}
 		else {
@@ -138,48 +147,69 @@ task main()
 			nMotorEncoder[motorE] = 0;
 		}
 
-		if (joy2Btn(2) || joy2Btn(1) || joy2Btn(4)) {
-			if (joy2Btn(2))
-				setLevel(stage1);
-			else if (joy2Btn(1))
-				setLevel(stage2);
-			else if (joy2Btn(4))
-				setLevel(stage3);
+		if (joy2Btn(1) || joy2Btn(4)) {
+			if (joy2Btn(1)) {
+				setLevelE(0);
+			  setLevelF(stage1F);
+			}
+			else if (joy2Btn(4)) {
+				setLevelE(stage2E);
+			  setLevelF(stage2F);
+			}
 		}
-
-
-		if(joy2Btn(6) == 1 || joy2Btn(8) == 1) {
-			nxtDisplayString(0, "                  ");
+		if (!ignorelimit) {
+		  if(joy2Btn(6) == 1 || joy2Btn(8) == 1) {
+		    nxtDisplayString(0, "                  ");
+			  nxtDisplayString(0, "%d : %d", nMotorEncoder[motorF], nMotorEncoder[motorE]);
+			  if (joy2Btn(6) == 1) {
+				  if (limit1 - nMotorEncoder[motorF] > 10) {
+					  motor[motorF]= 100;
+				  }
+				  else {
+					  motor[motorF] = 0;
+				  }
+				  if ((limit2 - nMotorEncoder[motorE] < -10) && limit1 - nMotorEncoder[motorF] <= 10) {
+					  motor[motorE] = -100;
+				  }
+			  	else if (limit2 - nMotorEncoder[motorE] >= -10 && limit1 - nMotorEncoder[motorF] <= 10) {
+					  motor[motorE] = 0;
+				  }
+			  }
+			  else {
+				  if (nMotorEncoder[motorE] < -10)
+					  motor[motorE] = 100;
+				  else
+					  motor[motorE] = 0;
+				  if (nMotorEncoder[motorF] > 10)
+					  motor[motorF] = -100;
+				  else if (nMotorEncoder[motorF] <= 10 && nMotorEncoder[motorE] >= -10)
+				  	motor[motorF] = 0;
+			  }
+		  }
+		  else {
+			  motor[motorF] = 0;
+			  motor[motorE] = 0;
+		  }
+	  }
+	  else {
+	  	nxtDisplayString(0, "                  ");
 			nxtDisplayString(0, "%d : %d", nMotorEncoder[motorF], nMotorEncoder[motorE]);
-			if (joy2Btn(6) == 1) {
-				if (limit1 - nMotorEncoder[motorF] > 10 || ignorelimit) {
-					motor[motorF]= 100;
-				}
-				else {
-					motor[motorF] = 0;
-				}
-				if ((limit2 - nMotorEncoder[motorE] > 10 || ignorelimit) && limit1 - nMotorEncoder[motorF] <= 10) {
-					motor[motorE] = 100;
-				}
-				else if (limit2 - nMotorEncoder[motorE] <= 10 && limit1 - nMotorEncoder[motorF] <= 10) {
-					motor[motorE] = 0;
-				}
-			}
-			else {
-				if (nMotorEncoder[motorE] > 10 || ignorelimit)
-					motor[motorE] = -100;
-				else
-					motor[motorE] = 0;
-				if (nMotorEncoder[motorF] > 10 || ignorelimit)
-					motor[motorF] = -100;
-				else if (nMotorEncoder[motorF] <= 10 && nMotorEncoder[motorE] <= 10)
-					motor[motorF] = 0;
-			}
-		}
-
-		else {
-			motor[motorF] = 0;
-			motor[motorE] = 0;
-		}
+	  	if (joy2Btn(8) || joy2Btn(6)) {
+	  		if (joy2Btn(6))
+	  			motor[motorF] = 100;
+	  	  else
+	  	  	motor[motorF] = -100;
+	    }
+	    else
+	    	motor[motorF] = 0;
+	    if (joy2Btn(5) || joy2Btn(7)) {
+	    	if (joy2Btn(5))
+	    		motor[motorE] = -100;
+	      else
+	      	motor[motorE] = 100;
+	    }
+	    else
+	    	motor[motorE] = 0;
+	  }
 	}
 }
