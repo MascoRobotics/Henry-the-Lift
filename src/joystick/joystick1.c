@@ -1,11 +1,11 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
 #pragma config(Sensor, S1,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S2,     SPEAK,          sensorSoundDB)
-#pragma config(Motor,  mtr_S1_C1_1,     motorA,        tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C1_2,     motorE,        tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C1_1,     motorC,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C1_2,     motorD,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_1,     motorB,        tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C2_2,     motorC,        tmotorTetrix, openLoop, reversed)
-#pragma config(Motor,  mtr_S1_C3_1,     motorD,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_2,     motorA,        tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C3_1,     motorE,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_2,     motorF,        tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C4_1,    servo1,               tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_2,    servo2,               tServoNone)
@@ -32,6 +32,12 @@
 |*    Port E                  motorE              12V                 Left motor                          *|
 \*---------------------------------------------------------------------------------------------------4246-*/
 #include "JoystickDriver.c"
+int stage1 = 850;
+int stage2 = 0;
+int stage3 = 0;
+int limit1 = 12689;
+int limit2 = 0;
+bool ignorelimit;
 void initializeRobot()
 {
 	//waitForStart();
@@ -52,6 +58,7 @@ float angle, magnitude, x, y;
 bool up = false;
 int threshold = 40;
 bool pressed;
+bool pressed1;
 task main()
 {
 	//initializeRobot();
@@ -72,14 +79,14 @@ task main()
 		if(abs(joystick.joy1_x2) > threshold){
 			motor[motorA] = -joystick.joy1_x2;
 			motor[motorB] = -joystick.joy1_x2;
-			motor[motorD] = joystick.joy1_x2;
+			motor[motorD] = -joystick.joy1_x2;
 			motor[motorC] = -joystick.joy1_x2;
 		}
 		else if(abs(joystick.joy1_x1) > threshold || abs(joystick.joy1_y1) > threshold){
-			motor[motorA] = -x;
-			motor[motorD] = -x;
+			motor[motorA] = x;
+			motor[motorD] = x;
 			motor[motorB] = -y;
-			motor[motorC] = y;
+			motor[motorC] = -y;
 		}
 		else{
 			motor[motorA] = 0;
@@ -106,28 +113,67 @@ task main()
 			pressed = false;
 		}
 
+		if (joy2Btn(3) == 1) {
+			pressed1 = true;
+		}
+		else {
+			if (pressed1) {
+				ignorelimit = !ignorelimit;
+				nxtDisplayString(0, "Ignore limit: %d", ignorelimit);
+			}
+			pressed1 = false;
+		}
+
 		if (up)
 			servo[servo1] = 145;
 		else
 			servo[servo1] = 255;
 
+		if (joy2Btn(9)) {
+			nxtDisplayString(0, "Motor F reset");
+			nMotorEncoder[motorF] = 0;
+		}
+		if (joy2Btn(10)) {
+			nxtDisplayString(0, "Motor E reset");
+			nMotorEncoder[motorE] = 0;
+		}
+
 		if (joy2Btn(2) || joy2Btn(1) || joy2Btn(4)) {
-			if (joy2Btn(2)) {
-				setLevel(2750);
-			}
+			if (joy2Btn(2))
+				setLevel(stage1);
+			else if (joy2Btn(1))
+				setLevel(stage2);
+			else if (joy2Btn(4))
+				setLevel(stage3);
 		}
 
 
 		if(joy2Btn(6) == 1 || joy2Btn(8) == 1) {
-			nxtDisplayString(0, "       ");
-			nxtDisplayString(0, "%d", nMotorEncoder[motorF]);
+			nxtDisplayString(0, "                  ");
+			nxtDisplayString(0, "%d : %d", nMotorEncoder[motorF], nMotorEncoder[motorE]);
 			if (joy2Btn(6) == 1) {
-				motor[motorF]= 100;
-				motor[motorE] = -100;
+				if (limit1 - nMotorEncoder[motorF] > 10 || ignorelimit) {
+					motor[motorF]= 100;
+				}
+				else {
+					motor[motorF] = 0;
+				}
+				if ((limit2 - nMotorEncoder[motorE] > 10 || ignorelimit) && limit1 - nMotorEncoder[motorF] <= 10) {
+					motor[motorE] = 100;
+				}
+				else if (limit2 - nMotorEncoder[motorE] <= 10 && limit1 - nMotorEncoder[motorF] <= 10) {
+					motor[motorE] = 0;
+				}
 			}
 			else {
-				motor[motorF] = -100;
-				motor[motorE] = 100;
+				if (nMotorEncoder[motorE] > 10 || ignorelimit)
+					motor[motorE] = -100;
+				else
+					motor[motorE] = 0;
+				if (nMotorEncoder[motorF] > 10 || ignorelimit)
+					motor[motorF] = -100;
+				else if (nMotorEncoder[motorF] <= 10 && nMotorEncoder[motorE] <= 10)
+					motor[motorF] = 0;
 			}
 		}
 
