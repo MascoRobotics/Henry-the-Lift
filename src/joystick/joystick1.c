@@ -36,9 +36,9 @@
 /*
 === VARS  (1) ===
 */
-int stage1F = 2473;
-int stage2F = 12720;
-int stage2E = -3303;
+int stage1F = 5452;
+int stage2F = 8386;
+int stage2E = -5034;
 int limit1 = 12689;
 int limit2 = -6475;
 float speed = 1;
@@ -46,6 +46,7 @@ bool ignorelimit;
 /*
 =========
 */
+
 
 
 /*
@@ -342,7 +343,21 @@ task main()
 		=== LIFT SYSTEM (DEBUG/NORMAL) ===
 		*/
 		if (!ignorelimit) {
-			if(joy2Btn(6) == 1 || joy2Btn(8) == 1) {
+			if (joy2Btn(5) || joy2Btn(7)) {
+				if (joy2Btn(5)) {
+					if (limit2 - nMotorEncoder[motorE] < -10)
+						motor[motorE] = -100;
+				  else
+				  	motor[motorE] = 0;
+				}
+				else {
+					if (nMotorEncoder[motorE] < -10)
+						motor[motorE] = 100;
+				  else
+				  	motor[motorE] = 0;
+				}
+			}
+			else if(joy2Btn(6) == 1 || joy2Btn(8) == 1) {
 				if (joy2Btn(6) == 1) {
 					if (limit1 - nMotorEncoder[motorF] > 10) {
 						motor[motorF]= 100;
